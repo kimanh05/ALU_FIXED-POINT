@@ -20,11 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-// ============================================================
-// ??n v? d?ch:
-//   do_left = 1 -> d?ch trái (<<<)
-//   do_left = 0 -> d?ch ph?i s? h?c (>>>)
-// ============================================================
+
 module shift_unit #(
     parameter int N = 32
 )(
@@ -33,9 +29,10 @@ module shift_unit #(
     input  logic                 do_left,
     output logic signed [N-1:0]  y
 );
+
+    // Combinational shift logic
     always_comb begin
         y = do_left ? (a <<< shamt) : (a >>> shamt);
     end
 
 endmodule
-

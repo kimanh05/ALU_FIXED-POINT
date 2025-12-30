@@ -20,12 +20,13 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-// ============================================================
-// ??n v? logic bitwise theo opcode:
-//   6: AND
-//   7: OR
-//   8: XOR
-//   9: NOR
+// Opcode mapping:
+//   4'd6 : AND
+//   4'd7 : OR
+//   4'd8 : XOR
+//   4'd9 : NOR
+//
+// For unsupported opcodes, output is set to zero.
 // ============================================================
 module logic_unit #(
     parameter int N = 32
@@ -37,13 +38,12 @@ module logic_unit #(
 );
     always_comb begin
         unique case (op)
-            4'd6:  y = a & b;
-            4'd7:  y = a | b;
-            4'd8:  y = a ^ b;
-            4'd9:  y = ~(a | b);
-            default: y = '0;
+            4'd6:  y = a & b;        // AND
+            4'd7:  y = a | b;        // OR
+            4'd8:  y = a ^ b;        // XOR
+            4'd9:  y = ~(a | b);     // NOR
+            default: y = '0;         // Default output
         endcase
     end
-
 endmodule
 

@@ -19,14 +19,6 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-
-// ============================================================
-// Chia fixed-point: (a << F) / b
-// - N?u b == 0: ovf = 1, y clamp v? MAXV/MINV tùy d?u a
-// - Dùng toán t? / cho mô ph?ng, synth s? t?o m?ch chia HW
-//   (ch?p nh?n cho project này, n?u mu?n t?i ?u h?n có th?
-//    thay b?ng Newton-Raphson, LUT reciprocal, v.v.)
-// ============================================================
 module div_unit #(
     parameter int N = 32,
     parameter int F = 31
@@ -39,23 +31,27 @@ module div_unit #(
     output logic signed [N-1:0]  y,
     output logic                 ovf
 );
+
+    // Maximum and minimum signed values for saturation
     localparam logic signed [N-1:0] MAXV = {1'b0, {(N-1){1'b1}}};
     localparam logic signed [N-1:0] MINV = {1'b1, {(N-1){1'b0}}};
 
+    // Extended numerator to hold the scaled value
     logic signed [2*N-1:0] num;
 
-    // scale numerator lên F bit fractional
+    // Scale numerator by shifting left F bits
     always_comb begin
-        num = $signed(a) <<< F; // gi? nguyên d?u
+        num = $signed(a) <<< F;
     end
 
+    // Registered output
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             y   <= '0;
             ovf <= 1'b0;
         end else if (en) begin
             if (b == '0) begin
-                // chia 0 -> báo ovf + clamp
+                // Division by zero: assert overflow and saturate output
                 ovf <= 1'b1;
                 y   <= a[N-1] ? MINV : MAXV;
             end else begin
@@ -66,4 +62,3 @@ module div_unit #(
     end
 
 endmodule
-

@@ -21,7 +21,7 @@
 
 
 // ============================================================
-// ??n v? so sánh signed:
+// Signed comparison unit:
 //   eq = (a == b)
 //   lt = (a <  b)
 //   le = (a <= b)
@@ -35,6 +35,7 @@ module compare_unit #(
     output logic                lt,
     output logic                le
 );
+
     assign eq = (a == b);
     assign lt = (a <  b);
     assign le = (a <= b);

@@ -21,99 +21,77 @@
 
 
 // ============================================================
-// Top-level: ALU fixed-point 32-bit, tham s? hoá
-// Q-format: m?c ??nh Q1.F (ví d? Q1.31 v?i N=32, F=31)
+// Fixed-point ALU top-level
+// Q-format: Q1.F (default Q1.31)
 // Opcode mapping:
-//   0:ADD 1:SUB 2:MUL 3:DIV
-//   4:SHL 5:SHR
-//   6:AND 7:OR  8:XOR 9:NOR
-//   10:EQ  11:LT 12:LE
+//   0 : ADD
+//   1 : SUB
+//   2 : MUL
+//   3 : DIV
+//   4 : SHL
+//   5 : SHR
+//   6 : AND
+//   7 : OR
+//   8 : XOR
+//   9 : NOR
+//   10: EQ
+//   11: LT
+//   12: LE
 // ============================================================
 module alu_fixed_point #(
-    parameter int N    = 32,   // t?ng s? bit
-    parameter int F    = 31,   // s? bit ph?n l?
-    parameter bit SAT  = 1,    // saturation cho c?ng/tr?
-    parameter int PIPE = 2     // pipeline cho nhánh nhân (2..3)
+    parameter int N    = 32,
+    parameter int F    = 31,
+    parameter bit SAT  = 1,
+    parameter int PIPE = 2
 )(
     input  logic                 clk,
     input  logic                 rst_n,
-    input  logic                 en,
+    input  logic                 en,        // valid_in for new operation
+
     input  logic signed [N-1:0]  a,
     input  logic signed [N-1:0]  b,
     input  logic        [3:0]    op,
+
     output logic signed [N-1:0]  y,
-    output logic                 ovf,   // overflow (add/sub/div0)
-    output logic                 z,     // zero flag
-    output logic                 n      // negative flag
+    output logic                 ovf,
+    output logic                 z,
+    output logic                 n,
+    output logic                 valid_out
 );
 
-    // --- ???ng s? h?c (add/sub/mul/div) ---
-    logic signed [N-1:0] y_algo;
-    logic                 ovf_algo;
-
+    // ============================================================
+    // Core ALU (fully pipelined inside algorithm)
+    // ============================================================
     algorithm #(
-        .N(N), .F(F), .SAT(SAT), .PIPE(PIPE)
+        .N   (N),
+        .F   (F),
+        .SAT (SAT),
+        .PIPE(PIPE)
     ) u_algorithm (
-        .clk (clk),
-        .rst_n (rst_n),
-        .en  (en),
-        .a   (a),
-        .b   (b),
-        .op  (op),
-        .y   (y_algo),
-        .ovf (ovf_algo)
+        .clk      (clk),
+        .rst_n    (rst_n),
+        .en       (en),
+        .a        (a),
+        .b        (b),
+        .op       (op),
+        .y        (y),
+        .ovf      (ovf),
+        .valid_out(valid_out)
     );
 
-    // --- ???ng shift ---
-    logic signed [N-1:0] y_shf;
-
-    shift_unit #(.N(N)) u_shift (
-        .a      (a),
-        .shamt  (b[$clog2(N)-1:0]),
-        .do_left(op == 4'd4), // 4: SHL, 5: SHR
-        .y      (y_shf)
-    );
-
-    // --- ???ng logic ---
-    logic signed [N-1:0] y_log;
-
-    logic_unit #(.N(N)) u_logic (
-        .a  (a),
-        .b  (b),
-        .op (op), // 6..9
-        .y  (y_log)
-    );
-
-    // --- so sánh ---
-    logic eq, lt, le;
-    compare_unit #(.N(N)) u_cmp (
-        .a (a),
-        .b (b),
-        .eq(eq),
-        .lt(lt),
-        .le(le)
-    );
-
-    // --- ch?n k?t qu? cu?i ---
-    select_unit #(.N(N)) u_sel (
-        .op    (op),
-        .y_algo(y_algo),
-        .y_shf (y_shf),
-        .y_log (y_log),
-        .eq    (eq),
-        .lt    (lt),
-        .le    (le),
-        .y     (y)
-    );
-
-    // --- c? tr?ng thái ---
-    flag_unit #(.N(N)) u_flags (
-        .y     (y),
-        .ovf_in(ovf_algo),
-        .ovf   (ovf),
-        .z     (z),
-        .n     (n)
-    );
+    // ============================================================
+    // Status flags
+    // - These flags are meaningful only when valid_out = 1
+    // - Hold previous values when valid_out = 0 to avoid confusion/glitches
+    // ============================================================
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            z <= 1'b0;
+            n <= 1'b0;
+        end else if (valid_out) begin
+            z <= (y == '0);
+            n <= y[N-1];
+        end
+    end
 
 endmodule
-

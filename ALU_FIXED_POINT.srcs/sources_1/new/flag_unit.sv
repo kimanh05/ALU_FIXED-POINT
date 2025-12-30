@@ -19,12 +19,6 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-// ============================================================
-// C? tr?ng thái:
-//   ovf: t? add/sub ho?c div (chia 0)
-//   z  : y == 0
-//   n  : bit d?u c?a y
-// ============================================================
 module flag_unit #(
     parameter int N = 32
 )(
@@ -34,9 +28,14 @@ module flag_unit #(
     output logic                z,
     output logic                n
 );
+
+    // Overflow flag is forwarded from arithmetic/division unit
     assign ovf = ovf_in;
+
+    // Zero flag is asserted when result equals zero
     assign z   = (y == '0);
+
+    // Negative flag reflects the sign bit of the result
     assign n   = y[N-1];
 
 endmodule
-

@@ -29,30 +29,36 @@ module add32 #(
     output logic signed [N-1:0] y,
     output logic                ovf
 );
+    // Extended sum with sign extension (N+1 bits)
     logic signed [N:0] s_ext;
 
     assign s_ext = {a[N-1], a} + {b[N-1], b};
 
-    // overflow signed: bit d?u và bit k? ti?p khác nhau
+    // Signed overflow detection:
+    // Overflow occurs when the extended MSB differs from the result sign bit
     assign ovf = (s_ext[N] != s_ext[N-1]);
 
-    if (SAT) begin : WITH_SAT
-        localparam logic signed [N-1:0] MAXV = {1'b0, {(N-1){1'b1}}};
-        localparam logic signed [N-1:0] MINV = {1'b1, {(N-1){1'b0}}};
+    generate
+        if (SAT) begin : WITH_SAT
+            // Maximum and minimum representable values
+            localparam logic signed [N-1:0] MAXV = {1'b0, {(N-1){1'b1}}};
+            localparam logic signed [N-1:0] MINV = {1'b1, {(N-1){1'b0}}};
 
-        always_comb begin
-            if (ovf) begin
-                // n?u s_ext[N] = 1 => overflow âm => clamp MINV
-                // n?u s_ext[N] = 0 => overflow d??ng => clamp MAXV
-                y = s_ext[N] ? MINV : MAXV;
-            end else begin
+            always_comb begin
+                if (ovf) begin
+                    // s_ext[N] = 1 : negative overflow -> clamp to MINV
+                    // s_ext[N] = 0 : positive overflow -> clamp to MAXV
+                    y = s_ext[N] ? MINV : MAXV;
+                end else begin
+                    y = s_ext[N-1:0];
+                end
+            end
+        end else begin : NO_SAT
+            always_comb begin
+                // No saturation: wrap-around behavior
                 y = s_ext[N-1:0];
             end
         end
-    end else begin : NO_SAT
-        always_comb begin
-            y = s_ext[N-1:0];
-        end
-    end
+    endgenerate
 
 endmodule

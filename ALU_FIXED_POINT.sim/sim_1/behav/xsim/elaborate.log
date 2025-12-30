@@ -11,16 +11,14 @@ Completed simulation data flow analysis
 Time Resolution for simulation is 1ps
 Compiling module xil_defaultlib.add32(SAT=1'b1)
 Compiling module xil_defaultlib.sub32(SAT=1'b1)
+Compiling module xil_defaultlib.shift_unit
+Compiling module xil_defaultlib.logic_unit
+Compiling module xil_defaultlib.compare_unit
 Compiling module xil_defaultlib.mul_core
 Compiling module xil_defaultlib.round_cut_default
 Compiling module xil_defaultlib.mul_unit
 Compiling module xil_defaultlib.div_unit_default
 Compiling module xil_defaultlib.algorithm(SAT=1'b1)
-Compiling module xil_defaultlib.shift_unit
-Compiling module xil_defaultlib.logic_unit
-Compiling module xil_defaultlib.compare_unit
-Compiling module xil_defaultlib.select_unit
-Compiling module xil_defaultlib.flag_unit
 Compiling module xil_defaultlib.alu_fixed_point
 Compiling module xil_defaultlib.tb_alu_fixed_point
 Compiling module xil_defaultlib.glbl
