@@ -49,7 +49,9 @@ The ALU is designed using a modular datapath architecture:
 
 ## 📂 Project Structure
 **/src** # Verilog source files
+
 **/testbench** # Testbench files
+
 **/sim** # Simulation results (waveforms)
 
 ## 🎯 Learning Outcomes
