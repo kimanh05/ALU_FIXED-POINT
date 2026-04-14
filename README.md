@@ -48,9 +48,9 @@ The ALU is designed using a modular datapath architecture:
 - GitHub for version control
 
 ## 📂 Project Structure
-/src # Verilog source files
-/testbench # Testbench files
-/sim # Simulation results (waveforms)
+**/src** # Verilog source files
+**/testbench** # Testbench files
+**/sim** # Simulation results (waveforms)
 
 ## 🎯 Learning Outcomes
 - Designed a pipelined datapath in RTL
